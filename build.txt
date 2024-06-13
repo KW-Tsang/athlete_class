@@ -1,0 +1,3 @@
+displayName = Athlete Class
+author = El
+version = 0.1

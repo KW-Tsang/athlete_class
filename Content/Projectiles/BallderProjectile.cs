@@ -22,7 +22,6 @@ public class BallderProjectile : ModProjectile
         
         // set custom AI
         Projectile.aiStyle = 0;
-        Projectile.ai[0] = 0f;
         
         Projectile.DamageType = ModContent.GetInstance<AthleticDamageClass>();
         Projectile.hostile = false;

@@ -16,9 +16,8 @@ public class BallderProjectile : ModProjectile
     
     public override void SetDefaults()
     {
-        Projectile.width = 48;
-        Projectile.height = 48;
-        Projectile.scale = 0.75f;
+        Projectile.width = 36;
+        Projectile.height = 36;
         Projectile.timeLeft = 300;
         
         // set custom AI

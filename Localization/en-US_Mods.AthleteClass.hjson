@@ -18,4 +18,8 @@ Items: {
 }
 
 DamageClasses.AthleticDamageClass.DisplayName: athletic damage
-Projectiles.BallderProjectile.DisplayName: Ball-der
+
+Projectiles: {
+	BallderProjectile.DisplayName: Ball-der
+	BallderSpecialProjectile.DisplayName: Ball-der
+}

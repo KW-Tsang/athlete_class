@@ -9,6 +9,10 @@ namespace AthleteClass.Content.Items.Weapons;
 
 public class Ballder : ModItem
 {
+    private int[] ShootedProjectile = {
+        ModContent.ProjectileType<BallderProjectile>(),
+        ModContent.ProjectileType<BallderSpecialProjectile>()
+    };
     public override void SetDefaults()
     {
         Item.width = 36;
@@ -29,7 +33,7 @@ public class Ballder : ModItem
         Item.autoReuse = true;
 
         Item.DamageType = ModContent.GetInstance<AthleticDamageClass>();
-        Item.shoot = ModContent.ProjectileType<BallderProjectile>();
+        Item.shoot = ShootedProjectile[0];
     }
 
     public override bool AltFunctionUse(Player player)
@@ -40,10 +44,10 @@ public class Ballder : ModItem
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type,
         int damage, float knockback)
     {
-        /*if (player.altFunctionUse == 2)
+        if (player.altFunctionUse == 2)
         {
-            return false;
-        }*/
+            return true;
+        }
         return true;
     }
 
@@ -52,13 +56,14 @@ public class Ballder : ModItem
         if (player.altFunctionUse == 2)
         {
             Item.damage = 20;
-            Item.useTime = 60;
+            Item.shoot = ShootedProjectile[1];
         }
         else
         {
             Item.damage = 10;
-            Item.useTime = 20;
+            Item.shoot = ShootedProjectile[0];
         }
-        return player.ownedProjectileCounts[Item.shoot] < 1;
+        return player.ownedProjectileCounts[ShootedProjectile[0]] < 1 &&
+               player.ownedProjectileCounts[ShootedProjectile[1]] < 1;
     }
 }

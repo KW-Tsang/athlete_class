@@ -1,4 +1,5 @@
 ﻿using AthleteClass.Content.Projectiles;
+using AthleteClass.Content.Projectiles.AthleteUI;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.DataStructures;
@@ -13,6 +14,8 @@ public class Ballder : ModItem
         ModContent.ProjectileType<BallderProjectile>(),
         ModContent.ProjectileType<BallderSpecialProjectile>()
     };
+
+    private int QTE = ModContent.ProjectileType<AthleteQte>();
     public override void SetDefaults()
     {
         Item.width = 36;
@@ -44,9 +47,11 @@ public class Ballder : ModItem
     public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type,
         int damage, float knockback)
     {
+        // summon qte on right click
         if (player.altFunctionUse == 2)
         {
-            return true;
+            Projectile.NewProjectile(source, player.Center, Vector2.Zero, QTE, 0, 0f);
+            return false;
         }
         return true;
     }
@@ -64,6 +69,7 @@ public class Ballder : ModItem
             Item.shoot = ShootedProjectile[0];
         }
         return player.ownedProjectileCounts[ShootedProjectile[0]] < 1 &&
+               player.ownedProjectileCounts[QTE] < 1 &&
                player.ownedProjectileCounts[ShootedProjectile[1]] < 1;
     }
 }

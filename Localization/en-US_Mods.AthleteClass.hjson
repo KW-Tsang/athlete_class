@@ -22,4 +22,5 @@ DamageClasses.AthleticDamageClass.DisplayName: athletic damage
 Projectiles: {
 	BallderProjectile.DisplayName: Ball-der
 	BallderSpecialProjectile.DisplayName: Ball-der
+	AthleteQte.DisplayName: Athlete Qte
 }

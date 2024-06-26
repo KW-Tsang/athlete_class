@@ -3,13 +3,16 @@ using AthleteClass.Common.Players;
 using Humanizer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Threading;
 using SteelSeries.GameSense.DeviceZone;
 using Terraria.ModLoader;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.Graphics;
 using Terraria.Graphics.CameraModifiers;
+using Terraria.ID;
 
 namespace AthleteClass.Content.Projectiles.AthleteUI;
 
@@ -63,17 +66,48 @@ public class AthleteQte : ModProjectile
         Projectile.Center = Owner.Center;
         int time = (int)Projectile.ai[0];
 
-        if (Main.mouseLeft && !prevDwn && currInd < 3)
+
+        if (currInd < 3)
         {
-            QTIndicator qti = Indicators[currInd];
-            if (! qti.SuccessfulHit(time))
+            // on click
+            if (Main.mouseLeft && !prevDwn)
             {
-                ChaPla.successfulTrick = false;
+                QTIndicator qti = Indicators[currInd++];
+                if (qti.SuccessfulHit(time))
+                {
+                    // summon dust on successful hit
+                    float n = 12 + Main._rand.NextFloat() * 3;
+                    float turnDegree = (float)Math.PI * 2 / n;
+                    float curDegree = (float)Math.PI * 2 * Main._rand.NextFloat();
+                    for (int i = (int)n; i > 0; i--)
+                    {
+                        Dust dust = Dust.NewDustDirect(Owner.Center + qti.Position - origin,
+                            Projectile.width, Projectile.height, DustID.YellowStarDust);
+                        dust.velocity = curDegree.ToRotationVector2() * 2f;
+                        dust.noGravity = true;
+                        curDegree += turnDegree;
+                    }
+
+                    SoundEngine.PlaySound(SoundID.Item4, Owner.Center);
+                }
+                else
+                {
+                    ChaPla.successfulTrick = false;
+                    SoundEngine.PlaySound(SoundID.Item16, Owner.Center);
+                }
+
+                qti.DoDraw = false;
             }
-            qti.DoDraw = false;
-            currInd++;
+            
+            // too late
+            else if (!Indicators[currInd].DoDraw)
+            {
+                currInd++;
+                SoundEngine.PlaySound(SoundID.Item16, Owner.Center);
+            }
         }
 
+        // zoom
         if (time < 20)
         {
             AthleteZoom.Scale += 0.025f;
@@ -97,7 +131,7 @@ public class AthleteQte : ModProjectile
     public override bool PreDraw(ref Color lightColor)
     {
         // calculate offset
-        Vector2 offSet = new Vector2(0f, Main.player[Projectile.owner].gfxOffY)
+        Vector2 offSet = new Vector2(0f, Owner.gfxOffY)
                          - Main.screenPosition;
 
         foreach (QTIndicator ind in Indicators)
@@ -147,7 +181,7 @@ public class AthleteQte : ModProjectile
             DoDraw = time <= ClickTime;
         }
 
-        public bool SuccessfulHit(int time) => time > ClickTime - 15 && time < ClickTime;
+        public bool SuccessfulHit(int time) => time > ClickTime - 12 && time < ClickTime;
 
     }
 }

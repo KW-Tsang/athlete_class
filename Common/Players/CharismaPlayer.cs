@@ -13,6 +13,6 @@ public class CharismaPlayer : ModPlayer
 
     public override void ResetEffects()
     {
-        successfulTrick = false;
+        
     }
 }

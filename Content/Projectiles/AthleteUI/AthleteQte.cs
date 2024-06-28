@@ -1,4 +1,5 @@
 using System;
+using AthleteClass.Common;
 using AthleteClass.Common.Players;
 using Humanizer;
 using Microsoft.Xna.Framework;
@@ -19,13 +20,15 @@ namespace AthleteClass.Content.Projectiles.AthleteUI;
 public class AthleteQte : ModProjectile
 {
     private Player Owner => Main.player[Projectile.owner];
-    private CharismaPlayer ChaPla => Main.player[Projectile.owner].GetModPlayer<CharismaPlayer>();
+    private CharismaPlayer ChaPla => Owner.GetModPlayer<CharismaPlayer>();
 
     private QTIndicator[] Indicators = new QTIndicator[3];
     private int currInd;
     private bool prevDwn;
 
-    private Vector2 origin = new Vector2(26f, 26f);
+    // offsets for drawing
+    private Vector2 origin = new (26f, 26f);
+    private Vector2 offSet => new Vector2(0f, Owner.gfxOffY) - Main.screenPosition;
 
     public override void SetDefaults()
     {
@@ -33,10 +36,12 @@ public class AthleteQte : ModProjectile
         Projectile.friendly = false;
         Projectile.hostile = false;
         Projectile.tileCollide = false;
-        Projectile.timeLeft = 150;
+        Projectile.timeLeft = 140;
 
         Projectile.aiStyle = 0;
         Projectile.ai[0] = 0f;
+
+        Projectile.netUpdate = false;
     }
 
     public override void OnSpawn(IEntitySource source)
@@ -49,6 +54,10 @@ public class AthleteQte : ModProjectile
                 50 + 30*i);
             curDegree += turnDegree;
         }
+        
+        // zoom
+        Main.instance.CameraModifiers.Add(new ZoomCameraModifier(
+            Projectile.timeLeft + 10, "athlete_qte", 1.5f, 20, 10));
 
         currInd = 0;
         prevDwn = true;
@@ -57,7 +66,8 @@ public class AthleteQte : ModProjectile
 
     public override void OnKill(int timeLeft)
     {
-        AthleteZoom.Scale = 1f;
+        // use item on 
+        ModItem weapon = Owner.HeldItem.ModItem;
     }
 
     public override void AI()
@@ -69,10 +79,11 @@ public class AthleteQte : ModProjectile
 
         if (currInd < 3)
         {
+            QTIndicator qti = Indicators[currInd];
             // on click
             if (Main.mouseLeft && !prevDwn)
             {
-                QTIndicator qti = Indicators[currInd++];
+                
                 if (qti.SuccessfulHit(time))
                 {
                     // summon dust on successful hit
@@ -89,38 +100,32 @@ public class AthleteQte : ModProjectile
                     }
 
                     SoundEngine.PlaySound(SoundID.Item4, Owner.Center);
+                    qti.State = 1;
                 }
                 else
                 {
                     ChaPla.successfulTrick = false;
                     SoundEngine.PlaySound(SoundID.Item16, Owner.Center);
+                    qti.State = 2;
                 }
 
-                qti.DoDraw = false;
+                currInd++;
             }
             
             // too late
-            else if (!Indicators[currInd].DoDraw)
+            else if (qti.OverTime(time))
             {
-                currInd++;
+                ChaPla.successfulTrick = false;
                 SoundEngine.PlaySound(SoundID.Item16, Owner.Center);
+                qti.State = 2;
+                currInd++;
             }
-        }
-
-        // zoom
-        if (time < 20)
-        {
-            AthleteZoom.Scale += 0.025f;
-        }
-        if (time > 140)
-        {
-            AthleteZoom.Scale -= 0.05f;
         }
 
         foreach (QTIndicator ind in Indicators)
         {
-            //skip
-            if(ind.DoDraw)
+            // update qti if necessary
+            if(ind.State == 0)
              ind.Update(time);
         }
 
@@ -130,31 +135,45 @@ public class AthleteQte : ModProjectile
 
     public override bool PreDraw(ref Color lightColor)
     {
-        // calculate offset
-        Vector2 offSet = new Vector2(0f, Owner.gfxOffY)
-                         - Main.screenPosition;
 
         foreach (QTIndicator ind in Indicators)
         {
-            // skip
-            if (!ind.DoDraw)
-            {
-                continue;
-            }
-
-            // inner circle
-            Main.EntitySpriteDraw((Texture2D) ModContent.Request<Texture2D>(
-                    "AthleteClass/Content/Projectiles/AthleteUI/AthleteQte_timer") ,
-                Owner.Center + ind.Position + offSet,
-                null, Color.White * 0.35f, 0f, origin, ind.Scale, SpriteEffects.None);
-            
-            // outer circle
-            Main.EntitySpriteDraw(TextureAssets.Projectile[Projectile.type].Value,
-                Owner.Center + ind.Position + offSet,
-                null, Color.White, 0f, origin, 1f, SpriteEffects.None);
+            drawQTI(ind);
         }
 
         return false;
+    }
+
+
+    private void drawQTI(QTIndicator ind)
+    {
+        // skip
+        if (ind.State == 1)
+        {
+            return;
+        }
+        
+        // fail
+        if (ind.State == 2)
+        {
+            Main.EntitySpriteDraw((Texture2D) ModContent.Request<Texture2D>(
+                    "AthleteClass/Content/Projectiles/AthleteUI/AthleteQte_fail") ,
+                Owner.Center + ind.Position + offSet,
+                null, Color.White, 0f, origin, 1f, SpriteEffects.None);
+            
+            return;
+        }
+        
+        // inner circle
+        Main.EntitySpriteDraw((Texture2D) ModContent.Request<Texture2D>(
+                "AthleteClass/Content/Projectiles/AthleteUI/AthleteQte_timer") ,
+            Owner.Center + ind.Position + offSet, 
+            null, Color.White * 0.35f, 0f, origin, ind.Scale, SpriteEffects.None);
+        
+        // outer circle
+        Main.EntitySpriteDraw(TextureAssets.Projectile[Projectile.type].Value,
+            Owner.Center + ind.Position + offSet,
+            null, Color.White, 0f, origin, 1f, SpriteEffects.None);
     }
 
 
@@ -163,7 +182,8 @@ public class AthleteQte : ModProjectile
         public Vector2 Position;
         private int ClickTime;
         
-        public bool DoDraw = true;
+        // 0 = active, 1 = success, 2 = fail
+        public int State = 0;
         public float Scale = 0f;
 
         public QTIndicator(float angle, int clickTime)
@@ -178,10 +198,10 @@ public class AthleteQte : ModProjectile
             {
                 Scale += 0.025f;
             }
-            DoDraw = time <= ClickTime;
         }
 
         public bool SuccessfulHit(int time) => time > ClickTime - 12 && time < ClickTime;
+        public bool OverTime(int time) => time > ClickTime;
 
     }
 }

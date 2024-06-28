@@ -1,4 +1,5 @@
-﻿using AthleteClass.Content.Projectiles;
+﻿using AthleteClass.Common.Players;
+using AthleteClass.Content.Projectiles;
 using AthleteClass.Content.Projectiles.AthleteUI;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -53,6 +54,7 @@ public class Ballder : ModItem
             Projectile.NewProjectile(source, player.Center, Vector2.Zero, QTE, 0, 0f);
             return false;
         }
+
         return true;
     }
 
@@ -60,15 +62,21 @@ public class Ballder : ModItem
     {
         if (player.altFunctionUse == 2)
         {
-            Item.damage = 20;
             Item.useTime = 150;
-            Item.shoot = ShootedProjectile[1];
         }
         else
         {
-            Item.damage = 10;
             Item.useTime = 20;
-            Item.shoot = ShootedProjectile[0];
+            if (player.GetModPlayer<CharismaPlayer>().successfulTrick)
+            {
+                Item.damage = 14;
+                Item.shoot = ShootedProjectile[1];
+            }
+            else
+            {
+                Item.damage = 7;
+                Item.shoot = ShootedProjectile[0];
+            }
         }
         return player.ownedProjectileCounts[ShootedProjectile[0]] < 1 &&
                player.ownedProjectileCounts[QTE] < 1 &&

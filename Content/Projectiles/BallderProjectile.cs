@@ -48,6 +48,9 @@ public class BallderProjectile : ModProjectile
 
     public override void AI()
     {
+        // set player rapier direction
+        //Main.player[Projectile.owner].heldProj = Projectile.whoAmI;
+            
         // select AI
         if (Projectile.ai[0] == 0f)
         {

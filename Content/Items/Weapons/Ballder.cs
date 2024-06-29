@@ -17,6 +17,7 @@ public class Ballder : ModItem
     };
 
     private int QTE = ModContent.ProjectileType<AthleteQte>();
+    
     public override void SetDefaults()
     {
         Item.width = 36;
@@ -27,17 +28,18 @@ public class Ballder : ModItem
         Item.value = 0;
         
         //placeholder
-        Item.damage = 10;
+        Item.damage = 7;
         Item.useTime = 20;
         Item.useAnimation = 20;
         Item.useStyle = ItemUseStyleID.Rapier;
-        Item.knockBack = 6;
+        Item.knockBack = 6f;
         Item.rare = ItemRarityID.Blue;
         Item.UseSound = SoundID.Item1;
         Item.autoReuse = true;
 
         Item.DamageType = ModContent.GetInstance<AthleticDamageClass>();
         Item.shoot = ShootedProjectile[0];
+        Item.shootSpeed = 20f;
     }
 
     public override bool AltFunctionUse(Player player)
@@ -54,6 +56,17 @@ public class Ballder : ModItem
             Projectile.NewProjectile(source, player.Center, Vector2.Zero, QTE, 0, 0f);
             return false;
         }
+        
+        // shoot special projectile 
+        if (player.GetModPlayer<CharismaPlayer>().successfulTrick)
+        {
+            Projectile.NewProjectile(source, player.Center, Vector2.Zero, ShootedProjectile[1],
+                16, 6f, player.whoAmI);
+            
+            // reset trick
+            player.GetModPlayer<CharismaPlayer>().successfulTrick = false;
+            return false;
+        }
 
         return true;
     }
@@ -62,22 +75,19 @@ public class Ballder : ModItem
     {
         if (player.altFunctionUse == 2)
         {
-            Item.useTime = 150;
+            Item.useTime = 140;
+            //Item.useStyle = ItemUseStyleID.Thrust;
+            Item.useAnimation = 140;
+            Item.noUseGraphic = false;
         }
         else
         {
             Item.useTime = 20;
-            if (player.GetModPlayer<CharismaPlayer>().successfulTrick)
-            {
-                Item.damage = 14;
-                Item.shoot = ShootedProjectile[1];
-            }
-            else
-            {
-                Item.damage = 7;
-                Item.shoot = ShootedProjectile[0];
-            }
+            //Item.useStyle = ItemUseStyleID.Rapier;
+            Item.useAnimation = 20;
+            Item.noUseGraphic = true;
         }
+
         return player.ownedProjectileCounts[ShootedProjectile[0]] < 1 &&
                player.ownedProjectileCounts[QTE] < 1 &&
                player.ownedProjectileCounts[ShootedProjectile[1]] < 1;

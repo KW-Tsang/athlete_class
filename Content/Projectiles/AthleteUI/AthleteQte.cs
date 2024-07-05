@@ -20,10 +20,12 @@ namespace AthleteClass.Content.Projectiles.AthleteUI;
 public class AthleteQte : ModProjectile
 {
     private Player Owner => Main.player[Projectile.owner];
-    private CharismaPlayer ChaPla => Owner.GetModPlayer<CharismaPlayer>();
 
     private QTIndicator[] Indicators = new QTIndicator[3];
     private int currInd;
+
+    private int SuccessfulTricks;
+    
     private bool prevDwn;
 
     // offsets for drawing
@@ -61,14 +63,9 @@ public class AthleteQte : ModProjectile
 
         currInd = 0;
         prevDwn = true;
-        ChaPla.successfulTrick = true;
+        SuccessfulTricks = 0;
     }
-
-    public override void OnKill(int timeLeft)
-    {
-        // use item on 
-        ModItem weapon = Owner.HeldItem.ModItem;
-    }
+    
 
     public override void AI()
     {
@@ -99,12 +96,12 @@ public class AthleteQte : ModProjectile
                         curDegree += turnDegree;
                     }
 
+                    SuccessfulTricks++;
                     SoundEngine.PlaySound(SoundID.Item4, Owner.Center);
                     qti.State = 1;
                 }
                 else
                 {
-                    ChaPla.successfulTrick = false;
                     SoundEngine.PlaySound(SoundID.Item16, Owner.Center);
                     qti.State = 2;
                 }
@@ -115,7 +112,6 @@ public class AthleteQte : ModProjectile
             // too late
             else if (qti.OverTime(time))
             {
-                ChaPla.successfulTrick = false;
                 SoundEngine.PlaySound(SoundID.Item16, Owner.Center);
                 qti.State = 2;
                 currInd++;
@@ -131,6 +127,12 @@ public class AthleteQte : ModProjectile
 
         Projectile.ai[0]++;
         prevDwn = Main.mouseLeft;
+    }
+
+    public override void OnKill(int timeLeft)
+    {
+        //int trickTime = 180;
+        Owner.GetModPlayer<CharismaPlayer>().TrickTimeLeft = 60 * SuccessfulTricks;
     }
 
     public override bool PreDraw(ref Color lightColor)

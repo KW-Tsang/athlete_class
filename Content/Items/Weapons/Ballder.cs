@@ -56,17 +56,6 @@ public class Ballder : ModItem
             Projectile.NewProjectile(source, player.Center, Vector2.Zero, QTE, 0, 0f);
             return false;
         }
-        
-        // shoot special projectile 
-        if (player.GetModPlayer<CharismaPlayer>().successfulTrick)
-        {
-            Projectile.NewProjectile(source, player.Center, Vector2.Zero, ShootedProjectile[1],
-                16, 6f, player.whoAmI);
-            
-            // reset trick
-            player.GetModPlayer<CharismaPlayer>().successfulTrick = false;
-            return false;
-        }
 
         return true;
     }
@@ -76,16 +65,28 @@ public class Ballder : ModItem
         if (player.altFunctionUse == 2)
         {
             Item.useTime = 140;
-            //Item.useStyle = ItemUseStyleID.Thrust;
+            Item.useStyle = ItemUseStyleID.Thrust;
             Item.useAnimation = 140;
-            Item.noUseGraphic = false;
+        }
+        // special attack
+        else if (player.GetModPlayer<CharismaPlayer>().TrickTimeLeft > 0)
+        {
+            Item.useTime = 20;
+            Item.useStyle = ItemUseStyleID.Rapier;
+            Item.useAnimation = 20;
+
+            Item.damage = 12;
+            Item.shoot = ShootedProjectile[1];
         }
         else
         {
             Item.useTime = 20;
-            //Item.useStyle = ItemUseStyleID.Rapier;
+            Item.useStyle = ItemUseStyleID.Rapier;
             Item.useAnimation = 20;
             Item.noUseGraphic = true;
+
+            Item.damage = 7;
+            Item.shoot = ShootedProjectile[0];
         }
 
         return player.ownedProjectileCounts[ShootedProjectile[0]] < 1 &&

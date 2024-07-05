@@ -4,15 +4,18 @@ namespace AthleteClass.Common.Players;
 
 public class CharismaPlayer : ModPlayer
 {
-    public bool successfulTrick;
+    public int TrickTimeLeft;
 
     public override void Initialize()
     {
-        successfulTrick = false;
+        TrickTimeLeft = -1;
     }
 
     public override void ResetEffects()
     {
-        
+        if (TrickTimeLeft >= 0)
+        {
+            TrickTimeLeft--;
+        }
     }
 }

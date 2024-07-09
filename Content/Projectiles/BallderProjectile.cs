@@ -1,4 +1,5 @@
 using System;
+using AthleteClass.Common.Players;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
@@ -107,6 +108,7 @@ public class BallderProjectile : ModProjectile
 
     public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
     {
+        Owner.GetModPlayer<CharismaPlayer>().AddCharisma(5);
         BounceBack();
         base.OnHitNPC(target, hit, damageDone);
     }

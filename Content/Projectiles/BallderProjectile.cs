@@ -101,6 +101,7 @@ public class BallderProjectile : ModProjectile
 
     public override bool OnTileCollide(Vector2 oldVelocity)
     {
+        Owner.GetModPlayer<CharismaPlayer>().PurgeCharisma();
         SoundEngine.PlaySound(SoundID.Dig, Projectile.Center);
         BounceBack();
         return false;
@@ -108,7 +109,7 @@ public class BallderProjectile : ModProjectile
 
     public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
     {
-        Owner.GetModPlayer<CharismaPlayer>().AddCharisma(5);
+        Owner.GetModPlayer<CharismaPlayer>().AddCharisma(3);
         BounceBack();
         base.OnHitNPC(target, hit, damageDone);
     }

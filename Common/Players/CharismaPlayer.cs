@@ -31,16 +31,18 @@ public class CharismaPlayer : ModPlayer
         CharismaDrainRate = 1/60f;
     }
 
+    public float GetQuotient() => Charisma / CharismaThreshold;
+
     public void AddCharisma(int x)
     {
         Charisma += x;
-        if (Charisma > 100 + CharismaLevel * 70)
+        if (Charisma > CharismaThreshold)
         {
-            Charisma = 100 + CharismaLevel * 70;
+            Charisma = CharismaThreshold;
         }
     }
 
-    public void PurgeCharisma(int x)
+    public void PurgeCharisma()
     {
         Charisma = 0;
     }
